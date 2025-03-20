@@ -1,0 +1,89 @@
+LIBRARY ieee;
+USE ieee.std_logic_1164.ALL;
+USE ieee.std_logic_arith.ALL;
+USE ieee.std_logic_unsigned.ALL;
+
+ENTITY MultiZoneSecurity_tb IS
+END MultiZoneSecurity_tb;
+
+ARCHITECTURE behavior OF MultiZoneSecurity_tb IS 
+
+    -- Component declaration for the unit under test (UUT)
+    COMPONENT MultiZoneSecurity
+    PORT(
+         S1, S2, S3 : IN STD_LOGIC;
+         B, O : IN STD_LOGIC;
+         L1, L2, L3 : OUT STD_LOGIC;
+         ALARM : OUT STD_LOGIC
+        );
+    END COMPONENT;
+   
+   -- Signals for inputs and outputs
+   SIGNAL S1, S2, S3 : STD_LOGIC := '0';
+   SIGNAL B, O : STD_LOGIC := '0';
+   SIGNAL L1, L2, L3, ALARM : STD_LOGIC;
+
+BEGIN
+    -- Instantiate the Unit Under Test (UUT)
+    uut: MultiZoneSecurity PORT MAP (
+          S1 => S1,
+          S2 => S2,
+          S3 => S3,
+          B => B,
+          O => O,
+          L1 => L1,
+          L2 => L2,
+          L3 => L3,
+          ALARM => ALARM
+        );
+
+    -- Stimulus process
+    stim_proc: PROCESS
+    BEGIN       
+        -- Initial state: All sensors off, no override, no bypass
+        S1 <= '0'; S2 <= '0'; S3 <= '0'; B <= '0'; O <= '0';
+        WAIT FOR 100 ns; 
+        
+        -- Test Case 1: Single sensor activation
+        S1 <= '1'; 
+        WAIT FOR 100 ns;
+        S1 <= '0';
+
+        S2 <= '1'; 
+        WAIT FOR 100 ns;
+        S2 <= '0';
+
+        S3 <= '1'; 
+        WAIT FOR 100 ns;
+        S3 <= '0';
+
+        -- Test Case 2: Two sensors activated (should trigger alarm)
+        S1 <= '1'; S2 <= '1'; 
+        WAIT FOR 100 ns;
+        S1 <= '0'; S2 <= '0';
+
+        -- Test Case 3: Three sensors activated (should trigger alarm)
+        S1 <= '1'; S2 <= '1'; S3 <= '1';
+        WAIT FOR 100 ns;
+        S1 <= '0'; S2 <= '0'; S3 <= '0';
+
+        -- Test Case 4: Bypass active (alarm should not activate)
+        S1 <= '1'; S2 <= '1'; B <= '1';
+        WAIT FOR 100 ns;
+        S1 <= '0'; S2 <= '0'; B <= '0';
+
+        -- Test Case 5: Override active (sensor LEDs and alarm should be off)
+        S1 <= '1'; S2 <= '1'; O <= '1';
+        WAIT FOR 100 ns;
+        S1 <= '0'; S2 <= '0'; O <= '0';
+
+        -- Test Case 6: Override and bypass together
+        S1 <= '1'; S2 <= '1'; B <= '1'; O <= '1';
+        WAIT FOR 100 ns;
+        S1 <= '0'; S2 <= '0'; B <= '0'; O <= '0';
+
+        -- End simulation
+        WAIT;
+    END PROCESS;
+
+END behavior;
