@@ -1,0 +1,23 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+entity MultiZoneSecurity is
+    Port (
+        S1, S2, S3 : in STD_LOGIC; -- Sensör girişleri
+        B, O : in STD_LOGIC;       -- Bypass ve Override Switch
+        L1, L2, L3 : out STD_LOGIC; -- Sensör LED'leri
+        ALARM : out STD_LOGIC       -- Alarm LED
+    );
+end MultiZoneSecurity;
+
+architecture Behavioral of MultiZoneSecurity is
+begin
+    -- Sensör LED'leri
+    L1 <= S1 and not O;
+    L2 <= S2 and not O;
+    L3 <= S3 and not O;
+    
+    -- Alarm LED kontrolü
+    ALARM <= (((S1 and S2) or (S1 and S3) or (S2 and S3)) and not B) and not O;
+    
+end Behavioral;
